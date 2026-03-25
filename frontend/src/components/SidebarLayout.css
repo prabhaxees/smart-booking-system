@@ -1,35 +1,46 @@
 /* Layout */
 .dashboard {
   display: flex;
-  height: 100vh;
-  background: #f4f6f9;
+  min-height: 100svh;
+  background: transparent;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
-  background: #ffffff;
-  padding: 20px;
-  border-right: 1px solid #ddd;
+  width: 240px;
+  background: var(--dash-surface);
+  padding: 24px 18px;
+  border-right: 1px solid var(--dash-border);
+  box-shadow: 12px 0 30px rgba(17, 24, 39, 0.06);
 }
 
 .sidebar h2 {
-  margin-bottom: 20px;
+  margin: 6px 0 20px;
+  font-family: "Fraunces", "Georgia", serif;
 }
 
 .sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sidebar li {
-  margin: 15px 0;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--dash-ink);
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
 }
 
 .sidebar li:hover {
-  color: blue;
+  background: #edf3ff;
+  color: var(--dash-primary);
+  transform: translateX(2px);
 }
 
 /* Main */
@@ -41,20 +52,31 @@
 
 /* Navbar */
 .navbar {
-  background: white;
-  padding: 15px 20px;
+  background: var(--dash-surface);
+  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #ddd;
+  align-items: center;
+  border-bottom: 1px solid var(--dash-border);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
 }
 
 .navbar button {
-  background: red;
+  background: linear-gradient(120deg, #ff5b5b 0%, #ff8f8f 100%);
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 999px;
   cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 8px 18px rgba(255, 91, 91, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navbar button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(255, 91, 91, 0.28);
 }
 
 /* Content */
@@ -62,6 +84,24 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px;
+  padding: 24px;
   flex: 1;
+}
+
+@media (max-width: 900px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sidebar ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }

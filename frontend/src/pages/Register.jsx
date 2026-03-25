@@ -1,5 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
+import "./Auth.css";
 
 function Register() {
   const [form, setForm] = useState({
@@ -23,14 +24,19 @@ function Register() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="name" placeholder="Name" onChange={handleChange} />
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} />
-        <button type="submit">Register</button>
-      </form>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div>
+          <h2>Create Account</h2>
+          <p className="auth-helper">Join to book spaces and track your activity.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input name="name" placeholder="Name" onChange={handleChange} />
+          <input name="email" placeholder="Email" onChange={handleChange} />
+          <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+          <button type="submit">Register</button>
+        </form>
+      </div>
     </div>
   );
 }

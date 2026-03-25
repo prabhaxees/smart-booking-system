@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 function Login() {
   const [form, setForm] = useState({
@@ -32,13 +33,18 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} />
-        <button type="submit">Login</button>
-      </form>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div>
+          <h2>Welcome Back</h2>
+          <p className="auth-helper">Log in to manage bookings and resources.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input name="email" placeholder="Email" onChange={handleChange} />
+          <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+          <button type="submit">Login</button>
+        </form>
+      </div>
     </div>
   );
 }

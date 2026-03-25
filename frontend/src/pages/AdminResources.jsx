@@ -216,7 +216,7 @@ function AdminResources() {
 
         <div className="admin-card">
           <h3>All Resources</h3>
-          {resources.length === 0 && <p>No resources yet.</p>}
+          {resources.length === 0 && <p className="empty-state">No resources yet.</p>}
           <div className="resource-list">
             {resources.map((resource) => (
               <div key={resource._id} className="resource-row">
@@ -274,7 +274,9 @@ function AdminResources() {
                     <div>
                       <strong>{resource.name}</strong>
                       <div className="resource-sub">
-                        {resource.type} • Capacity {resource.capacity}
+                        {resource.type}
+                        <span className="meta-sep" aria-hidden="true" />
+                        Capacity {resource.capacity}
                       </div>
                       <div className="resource-sub">
                         {resource.openingTime} - {resource.closingTime}

@@ -1,0 +1,106 @@
+.booking-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.booking-hero {
+  background: linear-gradient(120deg, #ffffff 0%, #f4f7ff 100%);
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid var(--dash-border);
+  box-shadow: var(--dash-shadow);
+}
+
+.booking-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+}
+
+.booking-card {
+  background: var(--dash-surface);
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid var(--dash-border);
+  box-shadow: var(--dash-shadow);
+}
+
+.booking-calendar .react-calendar {
+  width: 100%;
+  border: none;
+  background: var(--dash-surface);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+.booking-calendar .react-calendar__month-view__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.booking-calendar .react-calendar__tile {
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f9fbff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.booking-calendar .react-calendar__tile:enabled:hover {
+  border-color: #d7e3ff;
+  box-shadow: 0 8px 14px rgba(31, 78, 163, 0.12);
+  transform: translateY(-1px);
+}
+
+.booking-calendar .react-calendar__tile--now {
+  border-color: #b4c8ff;
+  background: #eef4ff;
+}
+
+.booking-calendar .react-calendar__tile--active {
+  background: linear-gradient(120deg, #eef3ff, #dfeaff);
+  border-color: #9cb7ff;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-form select,
+.booking-form input {
+  border: 1px solid var(--dash-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f9fbff;
+}
+
+.booking-time-row {
+  display: flex;
+  gap: 10px;
+}
+
+.booking-action {
+  background: linear-gradient(120deg, var(--dash-primary), var(--dash-primary-2));
+  color: #ffffff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(31, 78, 163, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.booking-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(31, 78, 163, 0.26);
+}
+
+@media (max-width: 900px) {
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+}

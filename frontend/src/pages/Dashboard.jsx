@@ -252,7 +252,7 @@ function Dashboard() {
         <div className="bookings-tab">
           <h3>My Bookings</h3>
           {groupedBookings.length === 0 && (
-            <p className="bookings-empty">No bookings yet.</p>
+            <p className="bookings-empty empty-state">No bookings yet.</p>
           )}
           <div className="bookings-list">
             {groupedBookings.map((item) => {
@@ -268,10 +268,14 @@ function Dashboard() {
                         {item.startDate} to {item.endDate}
                       </span>
                       <span className="booking-sub">
-                        {item.startTime}-{item.endTime} • {item.total} bookings
+                        {item.startTime}-{item.endTime}
+                        <span className="meta-sep" aria-hidden="true" />
+                        {item.total} bookings
                       </span>
                       <span className="booking-sub">
-                        Active {item.activeCount} • Cancelled {item.cancelledCount}
+                        Active {item.activeCount}
+                        <span className="meta-sep" aria-hidden="true" />
+                        Cancelled {item.cancelledCount}
                       </span>
                       {isEditing && (
                         <div className="series-edit">
