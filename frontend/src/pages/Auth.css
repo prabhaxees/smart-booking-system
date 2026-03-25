@@ -57,3 +57,32 @@
   font-size: 14px;
   color: var(--dash-muted);
 }
+
+.auth-alt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--dash-muted);
+}
+
+.auth-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--dash-border);
+  background: #ffffff;
+  color: var(--dash-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-link-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--dash-primary);
+  box-shadow: 0 8px 16px rgba(31, 78, 163, 0.12);
+}

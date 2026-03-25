@@ -1,6 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Auth.css";
 
 function Login() {
@@ -44,6 +44,12 @@ function Login() {
           <input name="password" type="password" placeholder="Password" onChange={handleChange} />
           <button type="submit">Login</button>
         </form>
+        <div className="auth-alt">
+          <span>New here?</span>
+          <Link className="auth-link-button" to="/register">
+            Create Account
+          </Link>
+        </div>
       </div>
     </div>
   );
