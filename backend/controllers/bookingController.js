@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import Booking from "../models/booking.js";
 
 // ➕ Create Booking
@@ -31,6 +32,96 @@ export const createBooking = async (req, res) => {
     });
 
     res.status(201).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user._id })
+      .populate("resource");
+
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const cancelBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // only owner can cancel
+    if (booking.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    booking.status = "cancelled";
+    await booking.save();
+
+    res.json({ message: "Booking cancelled" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const createRecurringBooking = async (req, res) => {
+  try {
+    const { resource, startDate, endDate, days, startTime, endTime } = req.body;
+
+    const seriesId = uuidv4();
+    const bookings = [];
+
+    let currentDate = new Date(startDate);
+    const lastDate = new Date(endDate);
+
+    while (currentDate <= lastDate) {
+      const day = currentDate.getDay(); // 0=Sun, 1=Mon...
+
+      if (days.includes(day)) {
+        const dateStr = currentDate.toISOString().split("T")[0];
+
+        // conflict check
+        const conflict = await Booking.findOne({
+          resource,
+          date: dateStr,
+          status: "active",
+          $or: [
+            {
+              startTime: { $lt: endTime },
+              endTime: { $gt: startTime },
+            },
+          ],
+        });
+
+        if (!conflict) {
+          bookings.push({
+            user: req.user._id,
+            resource,
+            date: dateStr,
+            startTime,
+            endTime,
+            recurring: true,
+            seriesId,
+          });
+        }
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    const created = await Booking.insertMany(bookings);
+
+    res.status(201).json({
+      message: "Recurring bookings created",
+      count: created.length,
+      seriesId,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
