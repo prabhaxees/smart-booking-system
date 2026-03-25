@@ -21,6 +21,7 @@ function Login() {
 
       // store token
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       alert("Login successful");
 

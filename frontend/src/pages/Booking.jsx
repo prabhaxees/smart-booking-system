@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import API from "../services/api";
+import SidebarLayout from "../components/SidebarLayout";
 
 function Booking() {
   const [date, setDate] = useState(new Date());
@@ -10,7 +11,7 @@ function Booking() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
-  // 📦 Fetch resources
+  // Fetch resources
   useEffect(() => {
     const fetchResources = async () => {
       const res = await API.get("/resources", {
@@ -24,7 +25,7 @@ function Booking() {
     fetchResources();
   }, []);
 
-  // 📅 Handle booking
+  // Handle booking
   const handleBooking = async () => {
     try {
       await API.post(
@@ -42,30 +43,27 @@ function Booking() {
         }
       );
 
-      alert("Booking successful 🎉");
+      alert("Booking successful");
     } catch (err) {
       alert(err.response?.data?.message || "Error");
     }
   };
 
   return (
-    <div>
+    <SidebarLayout title="Book Resource">
       <h2>Book a Resource</h2>
 
-      {/* 📅 Calendar */}
       <Calendar onChange={setDate} value={date} />
 
-      {/* 🏢 Resource Dropdown */}
       <select onChange={(e) => setSelectedResource(e.target.value)}>
         <option>Select Resource</option>
         {resources.map((r) => (
-          <option key={r._id} value={r._id}>
-            {r.name}
+          <option key={r._id} value={r._id} disabled={r.status === "maintenance"}>
+            {r.name}{r.status === "maintenance" ? " (Maintenance)" : ""}
           </option>
         ))}
       </select>
 
-      {/* ⏰ Time Inputs */}
       <div>
         <input
           type="time"
@@ -77,9 +75,8 @@ function Booking() {
         />
       </div>
 
-      {/* ➕ Book Button */}
       <button onClick={handleBooking}>Book</button>
-    </div>
+    </SidebarLayout>
   );
 }
 

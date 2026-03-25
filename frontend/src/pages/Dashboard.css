@@ -1,0 +1,238 @@
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tabs button {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tabs button.active {
+  border-color: #1f4ea3;
+  color: #1f4ea3;
+}
+
+.calendar-grid {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  align-items: stretch;
+}
+
+/* Calendar */
+.calendar {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar .react-calendar {
+  width: 100%;
+  flex: 1;
+  border: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar .react-calendar__viewContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar .react-calendar__month-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.calendar .react-calendar__month-view__weekdays {
+  flex: 0 0 auto;
+}
+
+.calendar .react-calendar__month-view__days {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 2px;
+}
+
+.calendar .react-calendar__tile {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6px;
+}
+
+.react-calendar__tile {
+  position: relative;
+}
+
+.tile-bookings {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.booking-badge {
+  font-size: 10px;
+  line-height: 1.2;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #e7f0ff;
+  color: #1f4ea3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-badge.active {
+  background: #e7f7ef;
+  color: #11643a;
+}
+
+.booking-badge.cancelled {
+  background: #fde8e8;
+  color: #a01414;
+  text-decoration: line-through;
+}
+
+.booking-more {
+  font-size: 10px;
+  color: #666;
+}
+
+/* Activity */
+.activity {
+  width: 260px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.activity h3 {
+  margin-bottom: 10px;
+}
+
+.activity p {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+/* Bookings Tab */
+.bookings-tab {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.bookings-empty {
+  color: #666;
+  font-size: 14px;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.booking-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.booking-title {
+  font-weight: 600;
+}
+
+.booking-time {
+  color: #333;
+  font-size: 14px;
+}
+
+.booking-sub {
+  color: #666;
+  font-size: 12px;
+}
+
+.booking-status {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+  background: #eef4ff;
+  color: #1f4ea3;
+}
+
+.booking-status.cancelled {
+  background: #fde8e8;
+  color: #a01414;
+}
+
+.booking-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.booking-action {
+  background: #f2f4f8;
+  border: 1px solid #dfe3ea;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.booking-action.danger {
+  background: #fde8e8;
+  border-color: #f5c2c2;
+  color: #a01414;
+}
+
+.series-edit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.series-edit input {
+  border: 1px solid #ddd;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.series-save,
+.series-cancel {
+  border: 1px solid #dfe3ea;
+  background: #f7f8fa;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}

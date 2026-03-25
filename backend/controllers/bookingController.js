@@ -1,10 +1,19 @@
 import { v4 as uuidv4 } from "uuid";
 import Booking from "../models/booking.js";
+import Resource from "../models/resource.js";
 
 // ➕ Create Booking
 export const createBooking = async (req, res) => {
   try {
     const { resource, date, startTime, endTime } = req.body;
+
+    const resourceDoc = await Resource.findById(resource);
+    if (!resourceDoc) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+    if (resourceDoc.status === "maintenance") {
+      return res.status(400).json({ message: "Resource is under maintenance" });
+    }
 
     // ⚠️ Conflict Detection
     const conflict = await Booking.findOne({
@@ -70,9 +79,58 @@ export const cancelBooking = async (req, res) => {
   }
 };
 
+export const cancelSeries = async (req, res) => {
+  try {
+    const { seriesId } = req.params;
+
+    const result = await Booking.updateMany(
+      { user: req.user._id, seriesId },
+      { $set: { status: "cancelled" } }
+    );
+
+    res.json({
+      message: "Series cancelled",
+      modified: result.modifiedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateSeries = async (req, res) => {
+  try {
+    const { seriesId } = req.params;
+    const { startTime, endTime } = req.body;
+
+    if (!startTime || !endTime) {
+      return res.status(400).json({ message: "Start and end time required" });
+    }
+
+    const result = await Booking.updateMany(
+      { user: req.user._id, seriesId },
+      { $set: { startTime, endTime } }
+    );
+
+    res.json({
+      message: "Series updated",
+      modified: result.modifiedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createRecurringBooking = async (req, res) => {
   try {
     const { resource, startDate, endDate, days, startTime, endTime } = req.body;
+
+    const resourceDoc = await Resource.findById(resource);
+    if (!resourceDoc) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+    if (resourceDoc.status === "maintenance") {
+      return res.status(400).json({ message: "Resource is under maintenance" });
+    }
 
     const seriesId = uuidv4();
     const bookings = [];

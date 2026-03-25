@@ -9,6 +9,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import SidebarLayout from "../components/SidebarLayout";
 
 function Analytics() {
   const [data, setData] = useState({
@@ -35,7 +36,7 @@ function Analytics() {
   }, []);
 
   return (
-    <div>
+    <SidebarLayout title="Analytics">
       <h2>Analytics Dashboard</h2>
 
       <h3>Top Resources</h3>
@@ -61,7 +62,7 @@ function Analytics() {
         <Tooltip />
         <Line type="monotone" dataKey="count" />
       </LineChart>
-    </div>
+    </SidebarLayout>
   );
 }
 

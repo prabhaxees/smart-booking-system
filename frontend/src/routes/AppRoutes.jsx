@@ -5,6 +5,7 @@ import Dashboard from "../pages/Dashboard";
 import Analytics from "../pages/Analytics";
 import ProtectedRoute from "./ProtectedRoute";
 import Booking from "../pages/Booking";
+import AdminResources from "../pages/AdminResources";
 
 function AppRoutes() {
   return (
@@ -39,6 +40,15 @@ function AppRoutes() {
            </ProtectedRoute>
           }
        />
+
+        <Route
+          path="/admin/resources"
+          element={
+            <ProtectedRoute>
+              <AdminResources />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
