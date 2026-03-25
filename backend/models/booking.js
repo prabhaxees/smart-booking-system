@@ -29,6 +29,14 @@ const bookingSchema = new mongoose.Schema(
       enum: ["active", "cancelled"],
       default: "active",
     },
+    recurring: {
+      type: Boolean,
+      default: false,
+    },
+    seriesId: {
+      type: String,
+    },
+    
   },
   { timestamps: true }
 );
