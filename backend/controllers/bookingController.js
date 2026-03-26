@@ -93,6 +93,19 @@ export const getMyBookings = async (req, res) => {
   }
 };
 
+export const getActiveBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ status: "active" })
+      .populate("resource")
+      .populate("user", "name email")
+      .sort({ date: 1, startTime: 1 });
+
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate("resource");
@@ -121,6 +134,48 @@ export const cancelBooking = async (req, res) => {
       });
     } catch (emailError) {
       console.error("SendGrid cancellation failed:", emailError?.message || emailError);
+    }
+
+    res.json({ message: "Booking cancelled" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const cancelBookingAsAdmin = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate("resource")
+      .populate("user", "name email");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.json({ message: "Booking already cancelled" });
+    }
+
+    booking.status = "cancelled";
+    await booking.save();
+
+    if (booking.user?.email) {
+      try {
+        await sendBookingCancelledEmail({
+          to: booking.user.email,
+          userName: booking.user.name || "User",
+          resourceName: booking.resource?.name || "Resource",
+          date: booking.date,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          bookingId: booking._id,
+        });
+      } catch (emailError) {
+        console.error(
+          "SendGrid admin cancellation failed:",
+          emailError?.message || emailError
+        );
+      }
     }
 
     res.json({ message: "Booking cancelled" });

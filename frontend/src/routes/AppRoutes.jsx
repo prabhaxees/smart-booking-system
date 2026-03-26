@@ -6,6 +6,7 @@ import Analytics from "../pages/Analytics";
 import ProtectedRoute from "./ProtectedRoute";
 import Booking from "../pages/Booking";
 import AdminResources from "../pages/AdminResources";
+import AdminBookings from "../pages/AdminBookings";
 
 function AppRoutes() {
   return (
@@ -14,7 +15,6 @@ function AppRoutes() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 🔒 Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -35,17 +35,25 @@ function AppRoutes() {
         <Route
           path="/booking"
           element={
-           <ProtectedRoute>
-             <Booking />
-           </ProtectedRoute>
+            <ProtectedRoute>
+              <Booking />
+            </ProtectedRoute>
           }
-       />
+        />
 
         <Route
           path="/admin/resources"
           element={
             <ProtectedRoute>
               <AdminResources />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/bookings"
+          element={
+            <ProtectedRoute>
+              <AdminBookings />
             </ProtectedRoute>
           }
         />

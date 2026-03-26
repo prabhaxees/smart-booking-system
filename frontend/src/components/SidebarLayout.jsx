@@ -22,7 +22,10 @@ function SidebarLayout({ title, children }) {
           <li onClick={() => navigate("/booking")}>Book</li>
           <li onClick={() => navigate("/analytics")}>Analytics</li>
           {isAdmin && (
-            <li onClick={() => navigate("/admin/resources")}>Admin</li>
+            <>
+              <li onClick={() => navigate("/admin/resources")}>Admin Resources</li>
+              <li onClick={() => navigate("/admin/bookings")}>Admin Bookings</li>
+            </>
           )}
         </ul>
       </div>
