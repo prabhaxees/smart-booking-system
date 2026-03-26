@@ -349,6 +349,12 @@ function Dashboard() {
           </div>
         </div>
       )}
+
+      <div className="dashboard-footer">
+        <span>Created by Prabhasees</span>
+        <span className="footer-sep" aria-hidden="true" />
+        <a href="mailto:sprabhasees@gmail.com">sprabhasees@gmail.com</a>
+      </div>
     </SidebarLayout>
   );
 }

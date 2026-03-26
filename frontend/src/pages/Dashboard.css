@@ -315,6 +315,37 @@
   color: var(--dash-ink);
 }
 
+.dashboard-footer {
+  margin-top: 24px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px dashed var(--dash-border);
+  background: linear-gradient(120deg, #f7f9ff 0%, #ffffff 100%);
+  color: var(--dash-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-footer a {
+  color: var(--dash-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.dashboard-footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--dash-border);
+}
+
 @media (max-width: 900px) {
   .calendar-grid {
     grid-template-columns: 1fr;
@@ -323,5 +354,4 @@
   .activity {
     width: 100%;
   }
-}
 }
