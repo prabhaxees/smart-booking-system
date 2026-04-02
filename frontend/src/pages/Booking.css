@@ -82,6 +82,82 @@
   gap: 10px;
 }
 
+.booking-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #2b3340;
+}
+
+.booking-toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.booking-recurring {
+  background: #f2f6ff;
+  border: 1px dashed #b9caff;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-recurring-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.booking-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5f6b7d;
+}
+
+.booking-recurring-value {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--dash-border);
+  font-weight: 600;
+  color: #233146;
+}
+
+.booking-weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booking-weekday {
+  border: 1px solid var(--dash-border);
+  background: #f9fbff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2b3340;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.booking-weekday:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(31, 78, 163, 0.12);
+}
+
+.booking-weekday.active {
+  background: linear-gradient(120deg, var(--dash-primary), var(--dash-primary-2));
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 8px 16px rgba(31, 78, 163, 0.2);
+}
+
 .booking-action {
   background: linear-gradient(120deg, var(--dash-primary), var(--dash-primary-2));
   color: #ffffff;
