@@ -8,19 +8,24 @@ function getConfig() {
     apiKey: process.env.SENDGRID_API_KEY,
     fromEmail: process.env.SENDGRID_FROM_EMAIL,
     fromName: process.env.SENDGRID_FROM_NAME || "Resource Booking",
-    dataResidency: process.env.SENDGRID_DATA_RESIDENCY, // set to "eu" if using EU subuser
+    dataResidency: process.env.SENDGRID_DATA_RESIDENCY,
   };
 }
 
 function ensureInitialized() {
-  if (initialized) return;
-  const { apiKey, dataResidency } = getConfig();
+  if (initialized) {
+    return;
+  }
+
   cachedConfig = getConfig();
+  const { apiKey, dataResidency } = cachedConfig;
+
   if (!apiKey) {
     console.warn("SendGrid disabled: missing SENDGRID_API_KEY");
     initialized = true;
     return;
   }
+
   sgMail.setApiKey(apiKey);
   if (dataResidency === "eu") {
     sgMail.setDataResidency("eu");
@@ -30,7 +35,6 @@ function ensureInitialized() {
 
 async function sendEmail({ to, subject, text, html }) {
   ensureInitialized();
-
   const { apiKey, fromEmail, fromName } = cachedConfig || getConfig();
 
   if (!apiKey || !fromEmail) {
@@ -38,15 +42,14 @@ async function sendEmail({ to, subject, text, html }) {
     return { skipped: true };
   }
 
-  const msg = {
+  await sgMail.send({
     to,
     from: { email: fromEmail, name: fromName },
     subject,
     text,
     html,
-  };
+  });
 
-  await sgMail.send(msg);
   return { skipped: false };
 }
 
@@ -66,7 +69,9 @@ export async function sendBookingConfirmedEmail({
 }) {
   const timeRange = formatTimeRange(startTime, endTime);
   const { fromName } = cachedConfig || getConfig();
+
   const subject = `Booking confirmed: ${resourceName} on ${date} ${timeRange}`;
+
   const text =
     `Hi ${userName || "there"},\n\n` +
     `Your booking is confirmed.\n` +
@@ -75,6 +80,7 @@ export async function sendBookingConfirmedEmail({
     `Time: ${timeRange}\n` +
     `Booking ID: ${bookingId}\n\n` +
     `Thanks,\n${fromName}`;
+
   const html =
     `<p>Hi ${userName || "there"},</p>` +
     `<p>Your booking is confirmed.</p>` +
@@ -100,7 +106,9 @@ export async function sendBookingCancelledEmail({
 }) {
   const timeRange = formatTimeRange(startTime, endTime);
   const { fromName } = cachedConfig || getConfig();
+
   const subject = `Booking cancelled: ${resourceName} on ${date} ${timeRange}`;
+
   const text =
     `Hi ${userName || "there"},\n\n` +
     `Your booking has been cancelled.\n` +
@@ -109,6 +117,7 @@ export async function sendBookingCancelledEmail({
     `Time: ${timeRange}\n` +
     `Booking ID: ${bookingId}\n\n` +
     `Thanks,\n${fromName}`;
+
   const html =
     `<p>Hi ${userName || "there"},</p>` +
     `<p>Your booking has been cancelled.</p>` +
@@ -136,7 +145,9 @@ export async function sendRecurringBookingConfirmedEmail({
 }) {
   const timeRange = formatTimeRange(startTime, endTime);
   const { fromName } = cachedConfig || getConfig();
+
   const subject = `Recurring bookings confirmed: ${resourceName} (${count} bookings)`;
+
   const text =
     `Hi ${userName || "there"},\n\n` +
     `Your recurring bookings are confirmed.\n` +
@@ -146,6 +157,7 @@ export async function sendRecurringBookingConfirmedEmail({
     `Count: ${count}\n` +
     `Series ID: ${seriesId}\n\n` +
     `Thanks,\n${fromName}`;
+
   const html =
     `<p>Hi ${userName || "there"},</p>` +
     `<p>Your recurring bookings are confirmed.</p>` +

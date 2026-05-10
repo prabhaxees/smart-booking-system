@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import http from "http";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
@@ -11,8 +11,6 @@ import { initSocket } from "./socket.js";
 
 
 // ✅ LOAD ENV FIRST
-dotenv.config();
-
 const app = express();
 const server = http.createServer(app);
 initSocket(server);
