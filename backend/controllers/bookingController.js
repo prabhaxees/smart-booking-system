@@ -6,6 +6,7 @@ import {
   sendBookingConfirmedEmail,
   sendRecurringBookingConfirmedEmail,
 } from "../services/emailService.js";
+import { emitBookingsChanged } from "../socket.js";
 
 // ➕ Create Booking
 export const createBooking = async (req, res) => {
@@ -61,6 +62,7 @@ export const createBooking = async (req, res) => {
       startTime,
       endTime,
     });
+    emitBookingsChanged("created");
 
     try {
       await sendBookingConfirmedEmail({
@@ -106,6 +108,19 @@ export const getActiveBookings = async (req, res) => {
   }
 };
 
+export const getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("resource")
+      .populate("user", "name email")
+      .sort({ date: 1, startTime: 1 });
+
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate("resource");
@@ -121,6 +136,7 @@ export const cancelBooking = async (req, res) => {
 
     booking.status = "cancelled";
     await booking.save();
+    emitBookingsChanged("cancelled");
 
     try {
       await sendBookingCancelledEmail({
@@ -142,6 +158,80 @@ export const cancelBooking = async (req, res) => {
   }
 };
 
+export const deleteBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    if (booking.status !== "cancelled") {
+      return res.status(400).json({ message: "Only cancelled bookings can be deleted" });
+    }
+
+    await booking.deleteOne();
+    emitBookingsChanged("deleted");
+
+    res.json({ message: "Booking deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteBookingAsAdmin = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.status !== "cancelled") {
+      return res.status(400).json({ message: "Only cancelled bookings can be deleted" });
+    }
+
+    await booking.deleteOne();
+    emitBookingsChanged("deleted");
+
+    res.json({ message: "Booking deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteSeries = async (req, res) => {
+  try {
+    const { seriesId } = req.params;
+    const bookings = await Booking.find({ user: req.user._id, seriesId });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({ message: "Series not found" });
+    }
+
+    const hasActiveBooking = bookings.some((booking) => booking.status !== "cancelled");
+    if (hasActiveBooking) {
+      return res.status(400).json({ message: "Only fully cancelled series can be deleted" });
+    }
+
+    const result = await Booking.deleteMany({ user: req.user._id, seriesId });
+    if (result.deletedCount > 0) {
+      emitBookingsChanged("series-deleted");
+    }
+
+    res.json({
+      message: "Series deleted",
+      deleted: result.deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const cancelBookingAsAdmin = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
@@ -158,6 +248,7 @@ export const cancelBookingAsAdmin = async (req, res) => {
 
     booking.status = "cancelled";
     await booking.save();
+    emitBookingsChanged("cancelled");
 
     if (booking.user?.email) {
       try {
@@ -198,6 +289,9 @@ export const cancelSeries = async (req, res) => {
       { user: req.user._id, seriesId },
       { $set: { status: "cancelled" } }
     );
+    if (result.modifiedCount > 0) {
+      emitBookingsChanged("series-cancelled");
+    }
 
     const emailPromises = bookingsToCancel.map((booking) =>
       sendBookingCancelledEmail({
@@ -240,6 +334,9 @@ export const updateSeries = async (req, res) => {
       { user: req.user._id, seriesId },
       { $set: { startTime, endTime } }
     );
+    if (result.modifiedCount > 0) {
+      emitBookingsChanged("series-updated");
+    }
 
     res.json({
       message: "Series updated",
@@ -328,6 +425,9 @@ export const createRecurringBooking = async (req, res) => {
     }
 
     const created = await Booking.insertMany(bookings);
+    if (created.length > 0) {
+      emitBookingsChanged("recurring-created");
+    }
 
     try {
       await sendRecurringBookingConfirmedEmail({

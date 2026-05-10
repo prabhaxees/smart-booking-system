@@ -63,6 +63,22 @@
   color: var(--dash-muted);
 }
 
+.booking-status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+  background: var(--dash-success-bg);
+  color: var(--dash-success);
+}
+
+.booking-status.cancelled {
+  background: var(--dash-danger-bg);
+  color: var(--dash-danger);
+}
+
 .booking-actions {
   display: flex;
   align-items: center;

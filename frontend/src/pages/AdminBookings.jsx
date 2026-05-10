@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 import API from "../services/api";
 import SidebarLayout from "../components/SidebarLayout";
 import "./AdminBookings.css";
@@ -21,11 +22,13 @@ function AdminBookings() {
 
   const isAdmin = user?.role === "admin";
 
-  const fetchActiveBookings = async () => {
-    setLoading(true);
+  const fetchBookings = useCallback(async ({ showLoading = true } = {}) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     setError("");
     try {
-      const res = await API.get("/bookings/active", {
+      const res = await API.get("/bookings/admin/all", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -34,13 +37,34 @@ function AdminBookings() {
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load bookings");
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchActiveBookings();
-  }, []);
+    if (!isAdmin) {
+      return;
+    }
+
+    fetchBookings();
+  }, [fetchBookings, isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      return undefined;
+    }
+
+    const socket = io("http://localhost:5000");
+    socket.on("bookings:changed", () => {
+      fetchBookings({ showLoading: false });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [fetchBookings, isAdmin]);
 
   const handleCancel = async (id) => {
     if (!window.confirm("Cancel this booking?")) {
@@ -58,10 +82,29 @@ function AdminBookings() {
           },
         }
       );
-      setBookings((prev) => prev.filter((booking) => booking._id !== id));
+      fetchBookings({ showLoading: false });
       setMessage("Booking cancelled.");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to cancel booking");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this cancelled booking?")) {
+      return;
+    }
+    setMessage("");
+    setError("");
+    try {
+      await API.delete(`/bookings/admin/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setBookings((prev) => prev.filter((booking) => booking._id !== id));
+      setMessage("Booking deleted.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete booking");
     }
   };
 
@@ -83,12 +126,12 @@ function AdminBookings() {
         <div className="admin-card">
           <div className="admin-header">
             <div>
-              <h3>Active Bookings</h3>
+              <h3>All Bookings</h3>
               <p className="admin-sub">
-                Manage and cancel any active booking.
+                Manage active bookings and delete cancelled bookings.
               </p>
             </div>
-            <button className="ghost-button" onClick={fetchActiveBookings}>
+            <button className="ghost-button" onClick={fetchBookings}>
               Refresh
             </button>
           </div>
@@ -97,7 +140,7 @@ function AdminBookings() {
           {loading ? (
             <p className="empty-state">Loading...</p>
           ) : bookings.length === 0 ? (
-            <p className="empty-state">No active bookings.</p>
+            <p className="empty-state">No bookings.</p>
           ) : (
             <div className="booking-list">
               {bookings.map((booking) => (
@@ -112,14 +155,26 @@ function AdminBookings() {
                       <span className="meta-sep" aria-hidden="true" />
                       {booking.user?.email || "No email"}
                     </div>
+                    <span className={`booking-status ${booking.status}`}>
+                      {booking.status}
+                    </span>
                   </div>
                   <div className="booking-actions">
-                    <button
-                      className="danger"
-                      onClick={() => handleCancel(booking._id)}
-                    >
-                      Cancel
-                    </button>
+                    {booking.status === "cancelled" ? (
+                      <button
+                        className="danger"
+                        onClick={() => handleDelete(booking._id)}
+                      >
+                        Delete
+                      </button>
+                    ) : (
+                      <button
+                        className="danger"
+                        onClick={() => handleCancel(booking._id)}
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

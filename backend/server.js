@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
@@ -6,12 +7,15 @@ import authRoutes from "./routes/authRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import { initSocket } from "./socket.js";
 
 
 // ✅ LOAD ENV FIRST
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+initSocket(server);
 
 // ✅ THEN connect DB
 connectDB();
@@ -33,6 +37,6 @@ app.use("/api/analytics", analyticsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

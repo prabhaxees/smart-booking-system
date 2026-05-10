@@ -139,6 +139,23 @@ function Dashboard() {
     }
   };
 
+  const handleDeleteBooking = async (id) => {
+    if (!window.confirm("Delete this cancelled booking?")) {
+      return;
+    }
+
+    try {
+      await API.delete(`/bookings/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      fetchBookings();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleCancelSeries = async (seriesId) => {
     try {
       await API.put(
@@ -150,6 +167,23 @@ function Dashboard() {
           },
         }
       );
+      fetchBookings();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteSeries = async (seriesId) => {
+    if (!window.confirm("Delete this cancelled series?")) {
+      return;
+    }
+
+    try {
+      await API.delete(`/bookings/series/${seriesId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       fetchBookings();
     } catch (err) {
       console.error(err);
@@ -305,18 +339,29 @@ function Dashboard() {
                       )}
                     </div>
                     <div className="booking-actions">
-                      <button
-                        className="booking-action"
-                        onClick={() => startEditingSeries(item)}
-                      >
-                        Edit Series
-                      </button>
-                      <button
-                        className="booking-action danger"
-                        onClick={() => handleCancelSeries(item.seriesId)}
-                      >
-                        Cancel Series
-                      </button>
+                      {item.activeCount > 0 ? (
+                        <>
+                          <button
+                            className="booking-action"
+                            onClick={() => startEditingSeries(item)}
+                          >
+                            Edit Series
+                          </button>
+                          <button
+                            className="booking-action danger"
+                            onClick={() => handleCancelSeries(item.seriesId)}
+                          >
+                            Cancel Series
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="booking-action danger"
+                          onClick={() => handleDeleteSeries(item.seriesId)}
+                        >
+                          Delete Series
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -336,12 +381,21 @@ function Dashboard() {
                     </span>
                   </div>
                   <div className="booking-actions">
-                    <button
-                      className="booking-action danger"
-                      onClick={() => handleCancelBooking(item.booking._id)}
-                    >
-                      Cancel
-                    </button>
+                    {item.booking.status === "cancelled" ? (
+                      <button
+                        className="booking-action danger"
+                        onClick={() => handleDeleteBooking(item.booking._id)}
+                      >
+                        Delete
+                      </button>
+                    ) : (
+                      <button
+                        className="booking-action danger"
+                        onClick={() => handleCancelBooking(item.booking._id)}
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 </div>
               );
