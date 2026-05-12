@@ -1,3 +1,17 @@
 
-# env
+# dependencies
+node_modules/
+**/node_modules/
+
+# build output
+dist/
+build/
+
+# environment variables
+.env
+*.env
 backend/.env
+frontend/.env
+
+# Misc
+.DS_Store
