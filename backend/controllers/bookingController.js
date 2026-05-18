@@ -6,58 +6,16 @@ import {
   sendBookingConfirmedEmail,
   sendRecurringBookingConfirmedEmail,
 } from "../services/emailService.js";
+import { createBookingForUser } from "../services/bookingService.js";
 import { emitBookingsChanged } from "../socket.js";
 
-// ➕ Create Booking
 export const createBooking = async (req, res) => {
   try {
     const { resource, date, startTime, endTime } = req.body;
-    const maxActiveBookings = Number.parseInt(
-      process.env.MAX_ACTIVE_BOOKINGS_PER_USER || "0",
-      10
-    );
 
-    const resourceDoc = await Resource.findById(resource);
-    if (!resourceDoc) {
-      return res.status(404).json({ message: "Resource not found" });
-    }
-    if (resourceDoc.status === "maintenance") {
-      return res.status(400).json({ message: "Resource is under maintenance" });
-    }
-
-    if (maxActiveBookings > 0) {
-      const activeCount = await Booking.countDocuments({
-        user: req.user._id,
-        status: "active",
-      });
-
-      if (activeCount >= maxActiveBookings) {
-        return res.status(400).json({
-          message: `Active booking limit reached (${maxActiveBookings}). Cancel a booking to create a new one.`,
-        });
-      }
-    }
-
-    // ⚠️ Conflict Detection
-    const conflict = await Booking.findOne({
-      resource,
-      date,
-      status: "active",
-      $or: [
-        {
-          startTime: { $lt: endTime },
-          endTime: { $gt: startTime },
-        },
-      ],
-    });
-
-    if (conflict) {
-      return res.status(400).json({ message: "Time slot already booked" });
-    }
-
-    const booking = await Booking.create({
-      user: req.user._id,
-      resource,
+    const { booking, resourceDoc } = await createBookingForUser({
+      userId: req.user._id,
+      resourceId: resource,
       date,
       startTime,
       endTime,
@@ -80,14 +38,13 @@ export const createBooking = async (req, res) => {
 
     res.status(201).json(booking);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
 export const getMyBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id })
-      .populate("resource");
+    const bookings = await Booking.find({ user: req.user._id }).populate("resource");
 
     res.json(bookings);
   } catch (error) {
@@ -129,7 +86,6 @@ export const cancelBooking = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // only owner can cancel
     if (booking.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not allowed" });
     }
@@ -306,9 +262,12 @@ export const cancelSeries = async (req, res) => {
     );
 
     const emailResults = await Promise.allSettled(emailPromises);
-    emailResults.forEach((r) => {
-      if (r.status === "rejected") {
-        console.error("SendGrid series cancellation failed:", r.reason?.message || r.reason);
+    emailResults.forEach((resultItem) => {
+      if (resultItem.status === "rejected") {
+        console.error(
+          "SendGrid series cancellation failed:",
+          resultItem.reason?.message || resultItem.reason
+        );
       }
     });
 
@@ -362,6 +321,23 @@ export const createRecurringBooking = async (req, res) => {
     if (resourceDoc.status === "maintenance") {
       return res.status(400).json({ message: "Resource is under maintenance" });
     }
+    if (!startDate || !endDate || startDate > endDate) {
+      return res.status(400).json({ message: "Valid start and end dates are required" });
+    }
+    if (!Array.isArray(days) || days.length === 0) {
+      return res.status(400).json({ message: "At least one recurring day is required" });
+    }
+    if (startTime >= endTime) {
+      return res.status(400).json({ message: "End time must be later than start time" });
+    }
+    if (
+      startTime < resourceDoc.openingTime ||
+      endTime > resourceDoc.closingTime
+    ) {
+      return res.status(400).json({
+        message: `Booking must be within resource hours (${resourceDoc.openingTime} - ${resourceDoc.closingTime})`,
+      });
+    }
 
     let activeCount = 0;
     if (maxActiveBookings > 0) {
@@ -380,26 +356,21 @@ export const createRecurringBooking = async (req, res) => {
     const seriesId = uuidv4();
     const bookings = [];
 
-    let currentDate = new Date(startDate);
-    const lastDate = new Date(endDate);
+    let currentDate = new Date(`${startDate}T00:00:00.000Z`);
+    const lastDate = new Date(`${endDate}T00:00:00.000Z`);
 
     while (currentDate <= lastDate) {
-      const day = currentDate.getDay(); // 0=Sun, 1=Mon...
+      const day = currentDate.getUTCDay();
 
       if (days.includes(day)) {
         const dateStr = currentDate.toISOString().split("T")[0];
 
-        // conflict check
         const conflict = await Booking.findOne({
           resource,
           date: dateStr,
           status: "active",
-          $or: [
-            {
-              startTime: { $lt: endTime },
-              endTime: { $gt: startTime },
-            },
-          ],
+          startTime: { $lt: endTime },
+          endTime: { $gt: startTime },
         });
 
         if (!conflict) {
@@ -415,7 +386,7 @@ export const createRecurringBooking = async (req, res) => {
         }
       }
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
     if (maxActiveBookings > 0 && activeCount + bookings.length > maxActiveBookings) {

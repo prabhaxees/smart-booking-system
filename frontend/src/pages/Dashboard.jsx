@@ -1,7 +1,7 @@
 import "./Dashboard.css";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import API from "../services/api";
 import SidebarLayout from "../components/SidebarLayout";
 
@@ -19,34 +19,59 @@ function Dashboard() {
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
 
-  const fetchBookings = useCallback(async () => {
+  const loadBookings = async () => {
+    const res = await API.get("/bookings/my", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    return res.data;
+  };
+
+  const applyBookings = (list) => {
+    const active = list.filter((booking) => booking.status === "active").length;
+    const cancelled = list.filter((booking) => booking.status === "cancelled").length;
+
+    setStats({
+      active,
+      cancelled,
+      total: list.length,
+    });
+
+    setBookings(list);
+  };
+
+  const refreshBookings = async () => {
     try {
-      const res = await API.get("/bookings/my", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const list = res.data;
-
-      const active = list.filter((b) => b.status === "active").length;
-      const cancelled = list.filter((b) => b.status === "cancelled").length;
-
-      setStats({
-        active,
-        cancelled,
-        total: list.length,
-      });
-
-      setBookings(list);
+      applyBookings(await loadBookings());
     } catch (err) {
       console.error(err);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+    let cancelled = false;
+
+    const fetchInitialBookings = async () => {
+      try {
+        const list = await loadBookings();
+        if (!cancelled) {
+          applyBookings(list);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error(err);
+        }
+      }
+    };
+
+    fetchInitialBookings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const formatDateKey = (value) => {
     const year = value.getFullYear();
@@ -133,7 +158,7 @@ function Dashboard() {
           },
         }
       );
-      fetchBookings();
+      refreshBookings();
     } catch (err) {
       console.error(err);
     }
@@ -150,7 +175,7 @@ function Dashboard() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      fetchBookings();
+      refreshBookings();
     } catch (err) {
       console.error(err);
     }
@@ -167,7 +192,7 @@ function Dashboard() {
           },
         }
       );
-      fetchBookings();
+      refreshBookings();
     } catch (err) {
       console.error(err);
     }
@@ -184,7 +209,7 @@ function Dashboard() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      fetchBookings();
+      refreshBookings();
     } catch (err) {
       console.error(err);
     }
@@ -211,7 +236,7 @@ function Dashboard() {
         }
       );
       setEditingSeriesId(null);
-      fetchBookings();
+      refreshBookings();
     } catch (err) {
       console.error(err);
     }

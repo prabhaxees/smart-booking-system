@@ -18,12 +18,91 @@
   gap: 24px;
 }
 
+.booking-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .booking-card {
   background: var(--dash-surface);
   padding: 20px;
   border-radius: 18px;
   border: 1px solid var(--dash-border);
   box-shadow: var(--dash-shadow);
+}
+
+.booking-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.booking-card-header h3,
+.booking-card h3 {
+  margin: 0;
+}
+
+.booking-card-header p {
+  margin: 0;
+  color: #5f6b7d;
+}
+
+.booking-ai-card {
+  background:
+    radial-gradient(circle at top right, rgba(76, 132, 255, 0.16), transparent 35%),
+    linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+}
+
+.booking-ai-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-ai-form textarea {
+  width: 100%;
+  border: 1px solid var(--dash-border);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  resize: vertical;
+  min-height: 110px;
+  font: inherit;
+}
+
+.booking-ai-response {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #d8e4ff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.booking-ai-response p {
+  margin: 0;
+  color: #233146;
+}
+
+.booking-ai-match {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #233146;
+}
+
+.booking-ai-match strong {
+  font-size: 18px;
+}
+
+.booking-ai-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .booking-calendar .react-calendar {
@@ -175,8 +254,29 @@
   box-shadow: 0 12px 24px rgba(31, 78, 163, 0.26);
 }
 
+.booking-action:disabled,
+.booking-secondary-action:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.booking-secondary-action {
+  border: 1px solid var(--dash-border);
+  background: #ffffff;
+  color: #233146;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
 @media (max-width: 900px) {
   .booking-grid {
     grid-template-columns: 1fr;
+  }
+
+  .booking-ai-actions,
+  .booking-time-row {
+    flex-direction: column;
   }
 }

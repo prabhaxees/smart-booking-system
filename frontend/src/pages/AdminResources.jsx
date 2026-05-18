@@ -8,10 +8,17 @@ const emptyForm = {
   name: "",
   type: "",
   capacity: "",
+  features: "",
   openingTime: "",
   closingTime: "",
   status: "active",
 };
+
+const parseFeatures = (value) =>
+  value
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
 
 function AdminResources() {
   const navigate = useNavigate();
@@ -32,21 +39,45 @@ function AdminResources() {
 
   const isAdmin = user?.role === "admin";
 
-  const fetchResources = async () => {
+  const loadResources = async () => {
+    const res = await API.get("/resources", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    return res.data;
+  };
+
+  const refreshResources = async () => {
     try {
-      const res = await API.get("/resources", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setResources(res.data);
+      setResources(await loadResources());
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load resources");
     }
   };
 
   useEffect(() => {
-    fetchResources();
+    let cancelled = false;
+
+    const fetchInitialResources = async () => {
+      try {
+        const data = await loadResources();
+        if (!cancelled) {
+          setResources(data);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.response?.data?.message || "Failed to load resources");
+        }
+      }
+    };
+
+    fetchInitialResources();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleChange = (e) => {
@@ -67,6 +98,7 @@ function AdminResources() {
         {
           ...form,
           capacity: Number(form.capacity),
+          features: parseFeatures(form.features),
         },
         {
           headers: {
@@ -77,7 +109,7 @@ function AdminResources() {
 
       setMessage("Resource added successfully.");
       setForm(emptyForm);
-      fetchResources();
+      refreshResources();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add resource");
     }
@@ -89,6 +121,7 @@ function AdminResources() {
       name: resource.name || "",
       type: resource.type || "",
       capacity: resource.capacity || "",
+      features: (resource.features || []).join(", "),
       openingTime: resource.openingTime || "",
       closingTime: resource.closingTime || "",
       status: resource.status || "active",
@@ -116,6 +149,7 @@ function AdminResources() {
         {
           ...editForm,
           capacity: Number(editForm.capacity),
+          features: parseFeatures(editForm.features),
         },
         {
           headers: {
@@ -125,7 +159,7 @@ function AdminResources() {
       );
       setMessage("Resource updated successfully.");
       cancelEdit();
-      fetchResources();
+      refreshResources();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update resource");
     }
@@ -141,7 +175,7 @@ function AdminResources() {
         },
       });
       setMessage("Resource deleted.");
-      fetchResources();
+      refreshResources();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete resource");
     }
@@ -174,13 +208,12 @@ function AdminResources() {
               onChange={handleChange}
               required
             />
-            <input
-              name="type"
-              placeholder="Type (room, lab, hall)"
-              value={form.type}
-              onChange={handleChange}
-              required
-            />
+            <select name="type" value={form.type} onChange={handleChange} required>
+              <option value="">Select type</option>
+              <option value="lab">Lab</option>
+              <option value="room">Room</option>
+              <option value="hall">Hall</option>
+            </select>
             <input
               name="capacity"
               type="number"
@@ -189,6 +222,12 @@ function AdminResources() {
               value={form.capacity}
               onChange={handleChange}
               required
+            />
+            <input
+              name="features"
+              placeholder="Features (projector, whiteboard, ac)"
+              value={form.features}
+              onChange={handleChange}
             />
             <div className="time-row">
               <input
@@ -228,12 +267,12 @@ function AdminResources() {
                       onChange={handleEditChange}
                       placeholder="Resource name"
                     />
-                    <input
-                      name="type"
-                      value={editForm.type}
-                      onChange={handleEditChange}
-                      placeholder="Type"
-                    />
+                    <select name="type" value={editForm.type} onChange={handleEditChange}>
+                      <option value="">Select type</option>
+                      <option value="lab">Lab</option>
+                      <option value="room">Room</option>
+                      <option value="hall">Hall</option>
+                    </select>
                     <input
                       name="capacity"
                       type="number"
@@ -241,6 +280,12 @@ function AdminResources() {
                       value={editForm.capacity}
                       onChange={handleEditChange}
                       placeholder="Capacity"
+                    />
+                    <input
+                      name="features"
+                      value={editForm.features}
+                      onChange={handleEditChange}
+                      placeholder="Features"
                     />
                     <div className="time-row">
                       <input
@@ -278,6 +323,9 @@ function AdminResources() {
                         <span className="meta-sep" aria-hidden="true" />
                         Capacity {resource.capacity}
                       </div>
+                      {resource.features?.length > 0 && (
+                        <div className="resource-sub">Features: {resource.features.join(", ")}</div>
+                      )}
                       <div className="resource-sub">
                         {resource.openingTime} - {resource.closingTime}
                       </div>

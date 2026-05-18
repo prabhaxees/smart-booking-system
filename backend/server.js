@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 import { initSocket } from "./socket.js";
 
 
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 
